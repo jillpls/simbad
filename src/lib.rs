@@ -6,17 +6,17 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Default, Clone, Debug)]
 pub struct Star {
-    id: usize,
-    pos: DVec3,
-    name: String,
-    class: String,
-    constellation: String
+    pub id: usize,
+    pub pos: DVec3,
+    pub name: String,
+    pub class: String,
+    pub constellation: String
 }
 
 #[derive(Default, Copy, Clone, Debug)]
 pub struct StellarPosition {
-    distance: f64,
-    coord: EquatorialCoordinate
+    pub distance: f64,
+    pub coord: EquatorialCoordinate
 }
 
 impl StellarPosition {
@@ -65,8 +65,8 @@ impl From<DVec3> for StellarPosition {
 
 #[derive(Default, Copy, Clone, Debug)]
 pub struct EquatorialCoordinate {
-    right_ascension: f64,
-    declination: f64
+    pub right_ascension: f64,
+    pub declination: f64
 }
 
 
@@ -87,9 +87,9 @@ impl EquatorialCoordinate {
 
 #[derive(Default, Copy, Clone, Debug)]
 pub struct Degree {
-    base: i16,
-    arc_mins: u8,
-    arc_secs: f64
+    pub base: i16,
+    pub arc_mins: u8,
+    pub arc_secs: f64
 }
 
 
@@ -109,9 +109,9 @@ impl Degree {
 
 #[derive(Default, Copy, Clone, Debug)]
 pub struct HourAngle {
-    hours: u8,
-    minutes: u8,
-    seconds: f64
+    pub hours: u8,
+    pub minutes: u8,
+    pub seconds: f64
 }
 
 impl HourAngle {
