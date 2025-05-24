@@ -208,7 +208,7 @@ pub fn import<P: AsRef<Path>>(path: P) -> Result<Vec<Star>, Box<dyn std::error::
     let mut stars = vec![];
     for record in records {
             if record.plx.is_none() { continue; }
-            let dist = 1./(record.plx.ok_or(SimbadError::Unspecified)/1000.)*3.26;
+            let dist = 1./(record.plx.ok_or(SimbadError::Unspecified)?/1000.)*3.26;
             let dist = if dist.is_finite() { dist } else { 0. };
             let coord1 = parse_coord(record.coord1.as_ref().ok_or(SimbadError::CoordNotFound)?);
             let coord2 = parse_coord(record.coord2.as_ref().ok_or(SimbadError::CoordNotFound)?);
