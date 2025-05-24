@@ -94,7 +94,7 @@ pub struct Degree {
 
 
 impl Degree {
-    pub(crate) fn new(base: i16, arc_mins: u8, arc_secs: f64) -> Self {
+    pub fn new(base: i16, arc_mins: u8, arc_secs: f64) -> Self {
         Self {
             base,
             arc_mins,
@@ -115,7 +115,7 @@ pub struct HourAngle {
 }
 
 impl HourAngle {
-    pub(crate) fn new(hours: u8, minutes: u8, seconds: f64) -> Self {
+    pub fn new(hours: u8, minutes: u8, seconds: f64) -> Self {
         Self {
             hours,
             minutes,
