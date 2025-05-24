@@ -1,13 +1,13 @@
 use std::fmt::{Debug, Display, Formatter};
 use std::path::Path;
 use csv::ReaderBuilder;
-use glam::{DVec2, DVec3};
+use glam::{Vec2, Vec3};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Clone, Debug)]
 pub struct Star {
     pub id: usize,
-    pub pos: DVec3,
+    pub pos: Vec3,
     pub name: String,
     pub class: String,
     pub constellation: String
@@ -15,12 +15,12 @@ pub struct Star {
 
 #[derive(Default, Copy, Clone, Debug)]
 pub struct StellarPosition {
-    pub distance: f64,
+    pub distance: f32,
     pub coord: EquatorialCoordinate
 }
 
 impl StellarPosition {
-    pub fn new(distance: f64, right_ascension: f64, declination: f64) -> Self {
+    pub fn new(distance: f32, right_ascension: f32, declination: f32) -> Self {
         Self {
             distance,
             coord : EquatorialCoordinate::new(right_ascension, declination)
@@ -34,25 +34,25 @@ impl Display for StellarPosition {
     }
 }
 
-impl Into<DVec3> for StellarPosition {
-    fn into(self) -> DVec3 {
+impl Into<Vec3> for StellarPosition {
+    fn into(self) -> Vec3 {
         let adj = self.distance*self.coord.declination.cos();
         let opp = self.distance*self.coord.declination.sin();
-        let plane_vec = DVec2::new(adj * self.coord.right_ascension.cos(), adj * self.coord.right_ascension.sin());
-        DVec3::new(plane_vec.x, plane_vec.y, opp)
+        let plane_vec = Vec2::new(adj * self.coord.right_ascension.cos(), adj * self.coord.right_ascension.sin());
+        Vec3::new(plane_vec.x, plane_vec.y, opp)
     }
 }
 
-impl From<DVec3> for StellarPosition {
-    fn from(value: DVec3) -> Self {
+impl From<Vec3> for StellarPosition {
+    fn from(value: Vec3) -> Self {
         let hyp= value.length();
-        let plane_vec = DVec2::new(value.x, value.y);
+        let plane_vec = Vec2::new(value.x, value.y);
         let adj = plane_vec.length();
         let dec = if hyp != 0. {(adj/hyp).acos() * value.z.signum()} else { 0. };
         let ra = (plane_vec.y.abs()).atan2(plane_vec.x.abs());
         let x = plane_vec.x;
         let y = plane_vec.y;
-        let ra = if x >= 0. && y >= 0. { ra } else if x >= 0. && y <= 0. { 180f64.to_radians() -ra } else if x <= 0. && y <= 0. { 180f64.to_radians() + ra} else { 360f64.to_radians() - ra };
+        let ra = if x >= 0. && y >= 0. { ra } else if x >= 0. && y <= 0. { 180f32.to_radians() -ra } else if x <= 0. && y <= 0. { 180f32.to_radians() + ra} else { 360f32.to_radians() - ra };
         Self {
             distance: hyp,
             coord: EquatorialCoordinate {
@@ -65,22 +65,22 @@ impl From<DVec3> for StellarPosition {
 
 #[derive(Default, Copy, Clone, Debug)]
 pub struct EquatorialCoordinate {
-    pub right_ascension: f64,
-    pub declination: f64
+    pub right_ascension: f32,
+    pub declination: f32
 }
 
 
 impl EquatorialCoordinate {
-    pub fn new(right_ascension: f64, declination: f64) -> Self {
-        let right_ascension = right_ascension % (std::f64::consts::PI*2.);
-        let declination = declination.max(-90f64.to_radians()).min(90f64.to_radians()); // TODO: Is there a cleaner way to do this?
+    pub fn new(right_ascension: f32, declination: f32) -> Self {
+        let right_ascension = right_ascension % (std::f32::consts::PI*2.);
+        let declination = declination.max(-90f32.to_radians()).min(90f32.to_radians()); // TODO: Is there a cleaner way to do this?
         Self {
             right_ascension,
             declination,
         }
     }
 
-    pub fn from_hour_angle(hour_angle: HourAngle, declination: f64) -> Self {
+    pub fn from_hour_angle(hour_angle: HourAngle, declination: f32) -> Self {
         Self::new(hour_angle.to_radians(), declination)
     }
 }
@@ -89,12 +89,12 @@ impl EquatorialCoordinate {
 pub struct Degree {
     pub base: i16,
     pub arc_mins: u8,
-    pub arc_secs: f64
+    pub arc_secs: f32
 }
 
 
 impl Degree {
-    pub fn new(base: i16, arc_mins: u8, arc_secs: f64) -> Self {
+    pub fn new(base: i16, arc_mins: u8, arc_secs: f32) -> Self {
         Self {
             base,
             arc_mins,
@@ -102,8 +102,8 @@ impl Degree {
         }
     }
 
-    pub fn to_f64(self) -> f64 {
-        self.base as f64 + (self.arc_mins as f64)/60. + (self.arc_secs)/3600.
+    pub fn to_f32(self) -> f32 {
+        self.base as f32 + (self.arc_mins as f32)/60. + (self.arc_secs)/3600.
     }
 }
 
@@ -111,30 +111,30 @@ impl Degree {
 pub struct HourAngle {
     pub hours: u8,
     pub minutes: u8,
-    pub seconds: f64
+    pub seconds: f32
 }
 
 impl HourAngle {
-    pub fn new(hours: u8, minutes: u8, seconds: f64) -> Self {
+    pub fn new(hours: u8, minutes: u8, seconds: f32) -> Self {
         Self {
             hours,
             minutes,
             seconds,
         }
     }
-    pub fn to_sec(&self) -> f64 {
-        (self.hours as u32 * 3600 + self.minutes as u32 * 60) as f64 + self.seconds
+    pub fn to_sec(&self) -> f32 {
+        (self.hours as u32 * 3600 + self.minutes as u32 * 60) as f32 + self.seconds
     }
 
-    pub fn max_secs() -> f64 {
-        (24 * 3600) as f64
+    pub fn max_secs() -> f32 {
+        (24 * 3600) as f32
     }
 
-    pub fn to_radians(&self) -> f64 {
-        self.to_sec() * std::f64::consts::PI / 43200f64
+    pub fn to_radians(&self) -> f32 {
+        self.to_sec() * std::f32::consts::PI / 43200f32
     }
 
-    pub fn to_degrees(&self) -> f64 {
+    pub fn to_degrees(&self) -> f32 {
         self.to_sec() / 240.
     }
 }
@@ -154,20 +154,20 @@ pub struct Record {
     #[serde(alias = "coord4 (Gal,J2000/2000)")]
     coord4: Option<String>,
     pm : Option<String>,
-    plx: Option<f64>,
-    radvel: Option<f64>,
-    redshift: Option<f64>,
-    cz: Option<f64>,
+    plx: Option<f32>,
+    radvel: Option<f32>,
+    redshift: Option<f32>,
+    cz: Option<f32>,
     #[serde(alias = "Mag U")]
-    mag_u: Option<f64>,
+    mag_u: Option<f32>,
     #[serde(alias = "Mag B")]
-    mag_b: Option<f64>,
+    mag_b: Option<f32>,
     #[serde(alias = "Mag V")]
-    mag_v: Option<f64>,
+    mag_v: Option<f32>,
     #[serde(alias = "Mag R")]
-    mag_r: Option<f64>,
+    mag_r: Option<f32>,
     #[serde(alias = "Mag I")]
-    mag_i: Option<f64>,
+    mag_i: Option<f32>,
     #[serde(alias = "spec. type")]
     spec_type: Option<String>,
     #[serde(alias = "morph. type")]
@@ -236,23 +236,23 @@ pub fn import<P: AsRef<Path>>(path: P) -> Result<Vec<Star>, Box<dyn std::error::
 fn parse_coord(input: &str) -> Option<EquatorialCoordinate> {
     let splits = input.split_whitespace().collect::<Vec<_>>();
     if splits.len() < 6 { return None; }
-    let ra = HourAngle::new(splits[0].parse::<u8>().ok()?, splits[1].parse::<u8>().ok()?, splits[2].parse::<f64>().ok()?);
+    let ra = HourAngle::new(splits[0].parse::<u8>().ok()?, splits[1].parse::<u8>().ok()?, splits[2].parse::<f32>().ok()?);
     let ra = ra.to_radians();
-    let dec = Degree::new((&splits[3][1..]).parse::<i16>().ok()?, splits[4].parse::<u8>().ok()?, splits[5].parse::<f64>().ok()?);
-    let dec = dec.to_f64();
+    let dec = Degree::new((&splits[3][1..]).parse::<i16>().ok()?, splits[4].parse::<u8>().ok()?, splits[5].parse::<f32>().ok()?);
+    let dec = dec.to_f32();
     let dec = (dec * if &splits[3][0..1] == "-" { -1. } else { 1. }).to_radians();
     Some(EquatorialCoordinate::new(ra, dec))
 }
 
 fn parse_coord4(input: &str) -> Option<EquatorialCoordinate> {
     let splits = input.split_whitespace().collect::<Vec<_>>();
-    let ra = splits[0].parse::<f64>().ok()?.to_radians();
-    let dec = splits[1].parse::<f64>().ok()?.to_radians();
+    let ra = splits[0].parse::<f32>().ok()?.to_radians();
+    let dec = splits[1].parse::<f32>().ok()?.to_radians();
     Some(EquatorialCoordinate::new(ra, dec))
 }
 
 fn average_coord(coords: &[EquatorialCoordinate]) -> EquatorialCoordinate {
-    let ra = coords.iter().map(|x| x.right_ascension).sum::<f64>()/(coords.len() as f64);
-    let dec = coords.iter().map(|x| x.declination).sum::<f64>()/(coords.len() as f64);
+    let ra = coords.iter().map(|x| x.right_ascension).sum::<f32>()/(coords.len() as f32);
+    let dec = coords.iter().map(|x| x.declination).sum::<f32>()/(coords.len() as f32);
     EquatorialCoordinate::new(ra, dec)
 }
